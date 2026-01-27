@@ -1,0 +1,169 @@
+/* --- Color Variables --- */
+:root {
+    /* Dark Mode (Default) */
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --accent: #38bdf8;
+    --border: #334155;
+    --hover-bg: rgba(56, 189, 248, 0.07);
+    
+    /* Rank Colors */
+    --gold: #fbbf24;
+    --silver: #cbd5e1;
+    --bronze: #d97706;
+}
+
+.light-mode {
+    /* Light Mode Overrides */
+    --bg-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-dim: #64748b;
+    --accent: #0284c7;
+    --border: #e2e8f0;
+    --hover-bg: rgba(2, 132, 199, 0.05);
+}
+
+/* --- General Styles --- */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1000px;
+    transition: background-color 0.3s ease;
+}
+
+/* --- Header Section --- */
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+}
+
+.theme-btn {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.theme-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* --- Table Styles --- */
+#leaderboardWrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    background: var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: 16px;
+    text-align: center;
+}
+
+/* Round top corners of the table header */
+th:first-child { border-top-left-radius: 12px; }
+th:last-child { border-top-right-radius: 12px; }
+
+td {
+    padding: 18px 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: var(--hover-bg);
+}
+
+/* --- Specialty Columns --- */
+.user-name-cell {
+    text-align: left;
+    font-weight: 500;
+    padding-left: 24px;
+}
+
+.solved-cell {
+    color: var(--text-dim);
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+.total-cell {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+/* --- Rank Styling --- */
+tr:nth-child(1) .user-name-cell { color: var(--gold); }
+tr:nth-child(2) .user-name-cell { color: var(--silver); }
+tr:nth-child(3) .user-name-cell { color: var(--bronze); }
+
+tr:nth-child(1) td:first-child { font-size: 1.5rem; }
+
+/* --- Loading Indicator --- */
+#loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    font-style: italic;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 640px) {
+    .container { padding: 1.5rem; }
+    h1 { font-size: 1.5rem; }
+    td, th { padding: 12px 8px; font-size: 0.85rem; }
+    .theme-btn { padding: 8px 12px; font-size: 0.8rem; }
+}
