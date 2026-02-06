@@ -1,26 +1,25 @@
-/* --- VARIABLES --- */
 :root {
-    /* Dark Mode (Default) */
+    /* Color Definitions - Dark Mode (Default) */
     --bg-color: #0f172a;
     --card-bg: #1e293b;
     --text-main: #f8fafc;
     --text-dim: #94a3b8;
     --accent: #38bdf8;
     --border: #334155;
-    --hover-bg: rgba(56, 189, 248, 0.07);
+    --hover-bg: rgba(56, 189, 248, 0.1);
     
-    /* Rank Colors */
+    /* Status Colors */
+    --winner: #4ade80; /* Green */
+    --loser: #f87171;  /* Red */
+    
+    /* Medals */
     --gold: #fbbf24;
     --silver: #cbd5e1;
     --bronze: #d97706;
-
-    /* Status Colors */
-    --winner: #4ade80; /* Yeşil */
-    --loser: #f87171;  /* Kırmızı */
 }
 
 .light-mode {
-    /* Light Mode Overrides */
+    /* Light Mode Colors */
     --bg-color: #f1f5f9;
     --card-bg: #ffffff;
     --text-main: #1e293b;
@@ -32,257 +31,188 @@
     --loser: #dc2626;
 }
 
-/* --- BASE STYLES --- */
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
     margin: 0;
     padding: 20px;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- HEADER --- */
+/* Header */
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto 30px auto;
-    padding: 0 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 1250px; margin: 0 auto 30px auto; padding: 0 10px;
 }
 
-h1 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin: 0;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-}
+h1 { margin: 0; color: var(--accent); font-weight: 800; letter-spacing: -1px; }
 
 .theme-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: transform 0.2s, opacity 0.2s;
+    background: var(--accent); color: white; border: none;
+    padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;
 }
 
-.theme-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-/* --- MAIN LAYOUT (2 Columns) --- */
+/* Layout */
 .layout-container {
-    display: flex;
-    gap: 24px;
-    max-width: 1250px;
-    margin: 0 auto;
-    align-items: flex-start;
+    display: flex; gap: 24px; max-width: 1300px; margin: 0 auto; align-items: flex-start;
 }
 
-/* --- LEFT: DUELS SECTION --- */
+/* --- SIDEBAR (DUELS) - NEW UI --- */
 .sidebar {
-    width: 320px;
-    flex-shrink: 0;
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    width: 350px; /* Biraz daha genişlettik ki isimler sığsın */
+    flex-shrink: 0; 
+    background: var(--card-bg); padding: 24px; 
+    border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
 }
 
 .sidebar h2 {
-    font-size: 1.25rem;
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--text-dim);
-    border-bottom: 2px solid var(--border);
-    padding-bottom: 10px;
+    text-align: center; color: var(--text-dim); margin-top: 0;
+    border-bottom: 2px solid var(--border); padding-bottom: 15px; 
+    font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase;
 }
 
-/* Accordion Styles */
-.accordion-item {
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
+/* Accordion Styling */
+.accordion-item { 
+    margin-bottom: 12px; 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    overflow: hidden; 
+    background: rgba(255,255,255,0.02);
 }
 
 .accordion-header {
-    background: var(--bg-color);
-    padding: 12px 15px;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
+    background: var(--bg-color); padding: 14px 18px; cursor: pointer;
+    font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+    user-select: none; transition: all 0.2s; color: var(--accent); font-size: 0.95rem;
+}
+.accordion-header:hover { background: var(--hover-bg); padding-left: 22px; }
+
+.accordion-content { display: none; background: var(--card-bg); border-top: 1px solid var(--border); }
+.accordion-content.active { display: block; animation: slideDown 0.3s ease-out; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- NEW MATCH CARD UI --- */
+.match-card {
+    display: flex; 
+    align-items: center; 
     justify-content: space-between;
-    align-items: center;
-    color: var(--text-main);
-    transition: background 0.2s;
-    user-select: none;
-}
-
-.accordion-header:hover { background: var(--hover-bg); }
-.accordion-header span { font-size: 0.8rem; color: var(--text-dim); }
-
-.accordion-content {
-    display: none;
-    padding: 0;
-    background: var(--card-bg);
-    border-top: 1px solid var(--border);
-}
-
-.accordion-content.active { display: block; }
-
-/* Match Box Style */
-.duel-match {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 12px 10px;
-    border-bottom: 1px dashed var(--border);
-    font-size: 0.9rem;
-    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
 }
-.duel-match:last-child { border-bottom: none; }
+.match-card:last-child { border-bottom: none; }
+.match-card:hover { background: rgba(255,255,255,0.03); }
+
+/* Player Name Styles */
+.player-info {
+    flex: 1; 
+    font-size: 0.9rem; 
+    font-weight: 700; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    color: var(--text-dim);
+    transition: color 0.3s;
+}
+
+.player-info.left { text-align: left; padding-right: 8px; }
+.player-info.right { text-align: right; padding-left: 8px; }
+
+/* Winner/Loser Colors */
+.player-info.winner { color: var(--winner);     }
+.player-info.loser { color: var(--loser); opacity: 0.7; text-decoration-color: rgba(248, 113, 113, 0.4); }
+
+/* Center Score Board */
+.score-board {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 6px;
+    background: var(--bg-color);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    min-width: 80px;
+}
+
+.score-num {
+    font-family: 'Inter', monospace;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    min-width: 20px;
+    text-align: center;
+}
+.score-num.winner-score { color: var(--winner); }
+.score-num.loser-score { color: var(--loser); opacity: 0.8; font-size: 0.95rem; }
 
 .vs-badge {
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    font-weight: bold;
-    text-transform: uppercase;
+    font-size: 0.65rem;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--accent);
+    opacity: 0.6;
 }
 
-.player-side {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Sol taraf (Kazanan genelde burada) -> Sağa yaslı yazı */
-.player-left { justify-content: flex-end; text-align: right; }
-/* Sağ taraf (Kaybeden genelde burada) -> Sola yaslı yazı */
-.player-right { justify-content: flex-start; text-align: left; }
-
-.score-badge {
-    font-weight: 800;
-    font-family: monospace;
-    font-size: 1rem;
-}
-
-.winner-text { color: var(--winner); }
-.loser-text { color: var(--loser); opacity: 0.8; }
-
-/* --- RIGHT: LEADERBOARD SECTION --- */
+/* --- LEADERBOARD --- */
 .leaderboard-area {
-    flex-grow: 1;
-    background: var(--card-bg);
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    flex-grow: 1; background: var(--card-bg); padding: 24px;
+    border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
 
 .table-wrapper { overflow-x: auto; }
-
 table { width: 100%; border-collapse: separate; border-spacing: 0; }
 
 th {
-    background: var(--border);
-    color: var(--text-dim);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    padding: 14px;
-    text-align: center;
+    background: var(--border); color: var(--text-dim); padding: 14px;
+    text-align: center; font-size: 0.8rem; text-transform: uppercase;
+    cursor: pointer; user-select: none;
 }
 th:first-child { border-top-left-radius: 8px; }
 th:last-child { border-top-right-radius: 8px; }
-
-/* Sortable Headers */
-th.sortable {
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    user-select: none;
-}
-th.sortable:hover { background: var(--accent); color: white; }
+th:hover { background: var(--accent); color: white; }
 
 td {
-    padding: 16px 12px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
+    padding: 16px 12px; text-align: center; border-bottom: 1px solid var(--border);
     font-size: 0.95rem;
-    transition: background 0.2s;
 }
-
-/* Row Styling */
-tbody tr { cursor: pointer; }
+tbody tr { cursor: pointer; transition: background 0.1s; }
 tbody tr:hover td { background-color: var(--hover-bg); }
-tr:last-child td { border-bottom: none; }
 
-.user-name-cell { text-align: left; padding-left: 20px; font-weight: 500; }
+.user-name-cell { text-align: left; padding-left: 20px; font-weight: 600; }
 .solved-cell { font-family: monospace; color: var(--text-dim); font-weight: bold; }
 .total-cell { font-weight: 800; color: var(--accent); font-size: 1.1rem; }
 
-/* Podium */
-tr:nth-child(1) .user-name-cell { color: var(--gold); font-weight: 700; }
-tr:nth-child(2) .user-name-cell { color: var(--silver); font-weight: 700; }
-tr:nth-child(3) .user-name-cell { color: var(--bronze); font-weight: 700; }
-tr:nth-child(1) td:first-child { font-size: 1.4rem; } /* Rank 1 Bigger */
+/* Podium Colors */
+tr:nth-child(1) .user-name-cell { color: var(--gold); }
+tr:nth-child(2) .user-name-cell { color: var(--silver); }
+tr:nth-child(3) .user-name-cell { color: var(--bronze); }
 
-/* --- LOADING & MODAL --- */
-#loading {
-    text-align: center;
-    padding: 40px;
-    font-size: 1.2rem;
-    color: var(--text-dim);
-    font-style: italic;
-}
-
+/* --- MODAL --- */
 .modal {
-    display: none; position: fixed; z-index: 1000;
-    left: 0; top: 0; width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s;
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
 }
-
 .modal-content {
-    background-color: var(--card-bg);
-    margin: 10% auto; padding: 30px;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    width: 90%; max-width: 450px;
-    position: relative;
-    text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    background: var(--card-bg); margin: 10vh auto; padding: 30px;
+    border-radius: 16px; width: 90%; max-width: 450px; position: relative;
+    text-align: center; border: 1px solid var(--border);
 }
-
-.close-btn {
-    position: absolute; top: 15px; right: 20px;
-    font-size: 24px; cursor: pointer; color: var(--text-dim);
-}
+.close-btn { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-dim); }
 .close-btn:hover { color: var(--accent); }
 
-#modalUsername { color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
+.cf-stats p { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 10px 0; margin: 0; }
+.cf-stats a { color: var(--accent); text-decoration: none; font-weight: bold; }
+#modalLoader { display: none; margin-top: 10px; color: var(--text-dim); font-style: italic; }
 
-.cf-stats p {
-    display: flex; justify-content: space-between;
-    padding: 8px 0; border-bottom: 1px dashed var(--border);
-    margin: 0; font-size: 0.95rem;
-}
-.cf-stats span, .cf-stats a { font-weight: bold; color: var(--text-main); }
-.cf-stats a { text-decoration: none; color: var(--accent); }
-.cf-stats a:hover { text-decoration: underline; color: var(--gold); }
-
-/* Responsive */
+/* Mobile Responsive */
 @media (max-width: 900px) {
     .layout-container { flex-direction: column; }
     .sidebar { width: 100%; box-sizing: border-box; }
     .leaderboard-area { width: 100%; box-sizing: border-box; }
 }
-
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
