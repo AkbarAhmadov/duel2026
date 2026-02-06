@@ -2,44 +2,44 @@ const CSV_FILE = 'veriler.csv';
 
 // Global Variables
 let currentLeaderboardData = [];
-let currentHeaders = [];
-let globalRoundHeaders = [];
+let currentHeaders = [];      // Headers to show in table
+let globalRoundHeaders = [];  // Headers for "Round X" (for pairing logic)
 
+// --- ON PAGE LOAD ---
 window.onload = function() {
     fetch(CSV_FILE)
         .then(res => {
-            if (!res.ok) throw new Error("CSV file not found!");
+            if (!res.ok) throw new Error("CSV file not found! (veriler.csv)");
             return res.text();
         })
         .then(csvText => {
             const { headers, data } = parseCSV(csvText);
             const processed = processLeaderboard(headers, data);
             
-            // Verileri sakla
+            // Save data
             currentHeaders = processed.displayHeaders;
             globalRoundHeaders = processed.roundHeaders;
             currentLeaderboardData = processed.leaderboard;
             
-            // 1. Tabloyu Çiz
+            // 1. Render Leaderboard
             renderTable();
             
-            // 2. Duelleri Hesapla ve Çiz
+            // 2. Render Duels (Swiss System)
             renderDuels(processed.roundHeaders, data);
         })
         .catch(err => {
-            document.getElementById('loading').innerText = "Error: " + err.message;
+            document.getElementById('loading').innerHTML = `Error: ${err.message}<br><small>Please make sure to run this via Live Server.</small>`;
             document.getElementById('loading').style.color = "var(--loser)";
         });
 };
 
-/* --- CSV PARSING --- */
+// --- CSV PARSING ---
 function parseCSV(text) {
     const lines = text.trim().split('\n');
-    const delimiter = lines[0].includes(';') ? ';' : ',';
+    const delimiter = lines[0].includes(';') ? ';' : ','; 
     const headers = lines[0].split(delimiter).map(h => h.trim());
     
     const data = lines.slice(1).map(line => {
-        // Satırı böl ama boş satırları atla
         if(line.trim() === "") return null;
         const values = line.split(delimiter).map(v => v.trim());
         let obj = {};
@@ -52,73 +52,91 @@ function parseCSV(text) {
     return { headers, data };
 }
 
-/* --- DATA PROCESSING --- */
+// --- DATA PROCESSING ---
 function processLeaderboard(headers, data) {
-    // Sütunları ayır
-    const roundHeaders = headers.filter(h => h.toLowerCase().includes('round'));
-    // Görüntülenecek sütunlar (Username, Solved vs. hariç)
+    // 1. Find columns starting with "Round"
+    const roundHeaders = headers.filter(h => h.toLowerCase().startsWith('round'));
+    
+    // 2. Filter headers for display (Hide Solved X, R1_Opponent, etc.)
     const displayHeaders = headers.filter(h => 
+        !h.toLowerCase().startsWith('solved') && 
         h !== 'Username' && 
-        h !== 'Solved Problems' && 
         h !== 'CodeforcesHandle' && 
         h !== 'R1_Opponent'
     );
 
     let leaderboard = data.map(row => {
-        let total = 0;
+        let totalScore = 0;
+        let totalSolved = 0;
         let rounds = {};
+        let roundsSolved = {};
 
-        // Round puanlarını işle (Round 1, Round 2...)
-        roundHeaders.forEach(round => {
-            // Integer'a yuvarla
-            let score = Math.round(parseFloat(row[round])) || 0;
-            rounds[round] = score;
-            // Sadece 'Total' sütununa dahil olacak roundları topla
-            // displayHeaders içinde varsa toplama dahil et (opsiyonel kontrol)
-            if (displayHeaders.includes(round)) {
-                total += score;
-            }
+        roundHeaders.forEach(roundName => {
+            // Get Score
+            let score = Math.round(parseFloat(row[roundName])) || 0;
+            rounds[roundName] = score;
+            totalScore += score;
+
+            // Get Correlated Solved Count (e.g. "Round 1" -> "Solved 1")
+            let roundNum = roundName.split(' ')[1]; 
+            let solvedColName = `Solved ${roundNum}`;
+            
+            let solvedCount = parseInt(row[solvedColName]) || 0;
+            roundsSolved[roundName] = solvedCount;
+            totalSolved += solvedCount;
         });
 
         return {
             username: row.Username || "Unknown",
-            rounds: rounds,
-            solvedProblems: parseInt(row['Solved Problems']) || 0,
+            rounds: rounds,            
+            roundsSolved: roundsSolved,
+            totalScore: totalScore,
+            totalSolved: totalSolved,
             cfHandle: row['CodeforcesHandle'] || null,
-            r1Opponent: row['R1_Opponent'] || null,
-            totalScore: total
+            r1Opponent: row['R1_Opponent'] || null
         };
     });
 
-    // Varsayılan Sıralama: Toplam Puan -> Çözülen Sayısı
+    // Default Sorting: Total Score -> Total Solved
     leaderboard.sort((a, b) => {
         if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-        return b.solvedProblems - a.solvedProblems;
+        return b.totalSolved - a.totalSolved;
     });
 
     return { displayHeaders, leaderboard, roundHeaders };
 }
 
-/* --- DUEL / MATCHMAKING LOGIC --- */
+// --- DUEL SYSTEM LOGIC (SWISS SYSTEM) ---
 function renderDuels(roundHeaders, rawData) {
     const duelsWrapper = document.getElementById('duelsWrapper');
     duelsWrapper.innerHTML = '';
 
-    // Ham veriyi işle (Hesaplama için)
+    // Create player objects from raw data for calculation
     let players = rawData.map(row => {
-        let p = { username: row.Username, rounds: {}, totalUntilNow: 0 };
-        roundHeaders.forEach(r => {
-            p.rounds[r] = Math.round(parseFloat(row[r])) || 0;
+        let p = { 
+            username: row.Username, 
+            rounds: {}, 
+            roundsSolved: {},
+            historyScore: 0, 
+            historySolved: 0 
+        };
+        
+        roundHeaders.forEach(rName => {
+            p.rounds[rName] = Math.round(parseFloat(row[rName])) || 0;
+            let roundNum = rName.split(' ')[1];
+            p.roundsSolved[rName] = parseInt(row[`Solved ${roundNum}`]) || 0;
         });
+        
         p.r1Opponent = row.R1_Opponent;
         return p;
     });
 
+    // Iterate through each round
     roundHeaders.forEach((roundName, roundIndex) => {
         let matchesHTML = '';
         let pairedUsers = new Set(); 
 
-        // --- ROUND 1: Excel'deki Rakiplere Göre ---
+        // --- ROUND 1: Pair based on Excel "R1_Opponent" ---
         if (roundIndex === 0) {
             players.forEach(p1 => {
                 if (pairedUsers.has(p1.username)) return;
@@ -132,25 +150,31 @@ function renderDuels(roundHeaders, rawData) {
             });
         } 
         
-        // --- ROUND 2+: Önceki Turların Toplamına Göre (Swiss System) ---
+        // --- ROUND 2+: Pair based on Ranking (Swiss) ---
         else {
-            // Her oyuncu için o ana kadarki (bu round hariç) toplamı hesapla
+            // Calculate scores UP TO this round (exclusive)
             players.forEach(p => {
-                let currentTotal = 0;
+                let currentTotalScore = 0;
+                let currentTotalSolved = 0;
+                
                 for (let i = 0; i < roundIndex; i++) {
-                    currentTotal += p.rounds[roundHeaders[i]];
+                    let rKey = roundHeaders[i];
+                    currentTotalScore += p.rounds[rKey];
+                    currentTotalSolved += p.roundsSolved[rKey];
                 }
-                p.totalUntilNow = currentTotal;
+                
+                p.historyScore = currentTotalScore;
+                p.historySolved = currentTotalSolved;
             });
 
-            // Puana göre sırala (Çoktan aza)
-            // Eğer puan eşitse isme göre sırala (rastgelelik olmaması için)
+            // Sort: Score -> Solved -> Name
             let sortedPlayers = [...players].sort((a, b) => {
-                if (b.totalUntilNow !== a.totalUntilNow) return b.totalUntilNow - a.totalUntilNow;
+                if (b.historyScore !== a.historyScore) return b.historyScore - a.historyScore;
+                if (b.historySolved !== a.historySolved) return b.historySolved - a.historySolved;
                 return a.username.localeCompare(b.username);
             });
 
-            // 1 vs 2, 3 vs 4 Eşleştir
+            // Pair 1vs2, 3vs4...
             for (let i = 0; i < sortedPlayers.length; i += 2) {
                 if (i + 1 < sortedPlayers.length) {
                     let p1 = sortedPlayers[i];
@@ -160,14 +184,14 @@ function renderDuels(roundHeaders, rawData) {
             }
         }
 
-        // Accordion Ekle
+        // Add Accordion Item
         const accordionHTML = `
             <div class="accordion-item">
                 <div class="accordion-header" onclick="toggleAccordion(this)">
                     ${roundName} <span>▼</span>
                 </div>
                 <div class="accordion-content">
-                    ${matchesHTML || '<p style="text-align:center; color:gray; font-size:0.9rem;">Waiting for pairings...</p>'}
+                    ${matchesHTML || '<p style="text-align:center;color:gray;padding:10px;">Waiting for pairings...</p>'}
                 </div>
             </div>
         `;
@@ -178,72 +202,83 @@ function renderDuels(roundHeaders, rawData) {
 function createMatchHTML(p1, p2, roundName) {
     let s1 = p1.rounds[roundName];
     let s2 = p2.rounds[roundName];
-    
-    // Varsayılan: P1 Solda, P2 Sağda
+
+    // Varsayılan: p1 solda, p2 sağda
     let leftUser = p1;
     let rightUser = p2;
     let leftScore = s1;
     let rightScore = s2;
+    
+    // CSS Sınıfları
+    let leftClass = "";
+    let rightClass = "";
+    let leftScoreClass = "";
+    let rightScoreClass = "";
 
-    // Kural: Kazanan her zaman SOL tarafta olsun.
-    // Eğer P2 kazandıysa yer değiştir.
-    if (s2 > s1) {
-        leftUser = p2; leftScore = s2;
-        rightUser = p1; rightScore = s1;
-    }
-
-    let leftClass = "winner-text";
-    let rightClass = "loser-text";
-
-    // Beraberlik durumu (Nadir ama olsun)
-    if (s1 === s2) {
-        leftClass = "";
-        rightClass = "";
+    if (s1 > s2) {
+        // Sol Kazandı
+        leftClass = "winner";
+        rightClass = "loser";
+        leftScoreClass = "winner-score";
+        rightScoreClass = "loser-score";
+    } else if (s2 > s1) {
+        // Sağ Kazandı
+        leftClass = "loser";
+        rightClass = "winner";
+        leftScoreClass = "loser-score";
+        rightScoreClass = "winner-score";
+    } else {
+        // Berabere
+        leftScoreClass = "draw-score";
+        rightScoreClass = "draw-score";
     }
 
     return `
-        <div class="duel-match">
-            <div class="player-side player-left">
-                <span class="score-badge ${leftClass}">${leftScore}</span>
-                <span class="${leftClass}">${leftUser.username}</span>
+        <div class="match-card">
+            <div class="player-info left ${leftClass}" title="${leftUser.username}">
+                ${leftUser.username}
             </div>
-            <div class="vs-badge">vs</div>
-            <div class="player-side player-right">
-                <span class="${rightClass}">${rightUser.username}</span>
-                <span class="score-badge ${rightClass}">${rightScore}</span>
+
+            <div class="score-board">
+                <span class="score-num ${leftScoreClass}">${leftScore}</span>
+                <span class="vs-badge">VS</span>
+                <span class="score-num ${rightScoreClass}">${rightScore}</span>
+            </div>
+
+            <div class="player-info right ${rightClass}" title="${rightUser.username}">
+                ${rightUser.username}
             </div>
         </div>
     `;
 }
 
+// Toggle Accordion
 function toggleAccordion(header) {
     const content = header.nextElementSibling;
     const isActive = content.classList.contains('active');
-    
-    // Açık olan diğerlerini kapat (İstersen bu satırı silip çoklu açmayı aktif edebilirsin)
+    // Close others
     document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
-
-    if (!isActive) {
-        content.classList.add('active');
-    }
+    // Open current
+    if (!isActive) content.classList.add('active');
 }
 
-/* --- SORTING & RENDERING TABLE --- */
+// --- TABLE SORTING & RENDERING ---
 function sortData(criteria) {
     currentLeaderboardData.sort((a, b) => {
         let valA, valB;
         if (criteria === 'totalScore') {
             valA = a.totalScore; valB = b.totalScore;
-        } else if (criteria === 'solvedProblems') {
-            valA = a.solvedProblems; valB = b.solvedProblems;
+        } else if (criteria === 'totalSolved') {
+            valA = a.totalSolved; valB = b.totalSolved;
         } else {
-            // Round
+            // Round Score
             valA = a.rounds[criteria] || 0;
             valB = b.rounds[criteria] || 0;
         }
 
         if (valB !== valA) return valB - valA;
-        return b.totalScore - a.totalScore; // Tie-break
+        // Tie-breaker: Total Score
+        return b.totalScore - a.totalScore;
     });
     renderTable();
 }
@@ -252,21 +287,21 @@ function renderTable() {
     const tableHead = document.querySelector('#leaderboard thead tr');
     const tableBody = document.getElementById('tableBody');
 
-    // Başlıklar
+    // Headers
     let headerHTML = `<th>Rank</th><th>Username</th>`;
-    currentHeaders.forEach(round => {
-        headerHTML += `<th class="sortable" onclick="sortData('${round}')">${round}</th>`;
+    globalRoundHeaders.forEach(round => {
+        headerHTML += `<th onclick="sortData('${round}')">${round}</th>`;
     });
-    headerHTML += `<th class="sortable" onclick="sortData('solvedProblems')">Solved (Tie-Break)</th>`;
-    headerHTML += `<th class="sortable" onclick="sortData('totalScore')">Total</th>`;
+    headerHTML += `<th onclick="sortData('totalSolved')">Total Solved</th>`;
+    headerHTML += `<th onclick="sortData('totalScore')">Total Score</th>`;
     
     tableHead.innerHTML = headerHTML;
 
-    // Satırlar
+    // Rows
     tableBody.innerHTML = '';
     currentLeaderboardData.forEach((user, index) => {
         let roundCells = '';
-        currentHeaders.forEach(round => {
+        globalRoundHeaders.forEach(round => {
             roundCells += `<td>${user.rounds[round]}</td>`;
         });
 
@@ -275,7 +310,7 @@ function renderTable() {
                 <td>${index + 1}</td>
                 <td class="user-name-cell">${user.username}</td>
                 ${roundCells}
-                <td class="solved-cell">${user.solvedProblems}</td>
+                <td class="solved-cell">${user.totalSolved}</td>
                 <td class="total-cell">${user.totalScore}</td>
             </tr>
         `;
@@ -283,34 +318,31 @@ function renderTable() {
     });
 
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'flex'; // Layout'u göster
+    document.getElementById('mainContent').style.display = 'flex';
 }
 
-/* --- MODAL & API --- */
+// --- MODAL & API ---
 const modal = document.getElementById("userModal");
 const closeBtn = document.querySelector(".close-btn");
-
 closeBtn.onclick = () => modal.style.display = "none";
 window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 
 function openModal(username, cfHandle) {
     modal.style.display = "block";
     document.getElementById("modalUsername").innerText = username;
-    
     const handleLink = document.getElementById("cfHandleLink");
     const loader = document.getElementById("modalLoader");
     
     // Reset
     handleLink.innerText = cfHandle || "Not linked";
-    handleLink.href = "#";
-    handleLink.removeAttribute("href");
+    handleLink.href = "#"; handleLink.removeAttribute("href");
     document.getElementById("cfRating").innerText = "-";
     document.getElementById("cfMaxRating").innerText = "-";
     document.getElementById("cfRank").innerText = "-";
     document.getElementById("cfSolved").innerText = "-";
     document.getElementById("cfRating").style.color = "var(--text-main)";
 
-    if (cfHandle && cfHandle.trim() !== "") {
+    if (cfHandle && cfHandle.trim()) {
         fetchCodeforcesStats(cfHandle.trim());
     } else {
         handleLink.innerText = "No Codeforces Account";
@@ -320,57 +352,51 @@ function openModal(username, cfHandle) {
 async function fetchCodeforcesStats(handle) {
     const loader = document.getElementById("modalLoader");
     loader.style.display = "block";
-
     try {
         // User Info
         const infoRes = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
         const infoData = await infoRes.json();
-
+        
         if (infoData.status === "OK") {
             const user = infoData.result[0];
-            const handleLink = document.getElementById("cfHandleLink");
-            handleLink.href = `https://codeforces.com/profile/${handle}`;
+            const link = document.getElementById("cfHandleLink");
+            link.href = `https://codeforces.com/profile/${handle}`;
             
-            const ratingElem = document.getElementById("cfRating");
-            ratingElem.innerText = user.rating || "Unrated";
+            const rElem = document.getElementById("cfRating");
+            rElem.innerText = user.rating || "Unrated";
             document.getElementById("cfMaxRating").innerText = user.maxRating || "Unrated";
             document.getElementById("cfRank").innerText = user.rank || "Unrated";
-
-            // Rating Color
+            
+            // Rating Colors
             if (user.rating) {
-                if(user.rating >= 2400) ratingElem.style.color = "#FF0000"; // GM+
-                else if(user.rating >= 2100) ratingElem.style.color = "#FF8C00"; // Master
-                else if(user.rating >= 1900) ratingElem.style.color = "#AA00AA"; // CM
-                else if(user.rating >= 1600) ratingElem.style.color = "#0000FF"; // Expert
-                else if(user.rating >= 1400) ratingElem.style.color = "#03A89E"; // Specialist
-                else if(user.rating >= 1200) ratingElem.style.color = "#008000"; // Pupil
-                else ratingElem.style.color = "#808080"; 
+                if(user.rating>=2400) rElem.style.color="#FF0000";
+                else if(user.rating>=2100) rElem.style.color="#FF8C00";
+                else if(user.rating>=1900) rElem.style.color="#AA00AA";
+                else if(user.rating>=1600) rElem.style.color="#0000FF";
+                else if(user.rating>=1400) rElem.style.color="#03A89E";
+                else if(user.rating>=1200) rElem.style.color="#008000";
+                else rElem.style.color="#808080";
             }
         }
 
         // Solved Count
-        const statusRes = await fetch(`https://codeforces.com/api/user.status?handle=${handle}`);
-        const statusData = await statusRes.json();
-
-        if (statusData.status === "OK") {
-            const solvedSet = new Set();
-            statusData.result.forEach(sub => {
-                if (sub.verdict === "OK") solvedSet.add(sub.problem.name);
-            });
-            document.getElementById("cfSolved").innerText = solvedSet.size;
+        const stRes = await fetch(`https://codeforces.com/api/user.status?handle=${handle}`);
+        const stData = await stRes.json();
+        if(stData.status==="OK"){
+            const s = new Set();
+            stData.result.forEach(x=>{if(x.verdict==="OK")s.add(x.problem.name)});
+            document.getElementById("cfSolved").innerText = s.size;
         }
-
-    } catch (error) {
-        console.error("API Error", error);
-        document.getElementById("cfHandleLink").innerText = "Error fetching data";
-    } finally {
-        loader.style.display = "none";
+    } catch(e) { 
+        console.error(e);
+        document.getElementById("cfHandleLink").innerText = "API Error";
+    } finally { 
+        loader.style.display = "none"; 
     }
 }
 
 // Dark Mode Toggle
 document.getElementById('theme-toggle').addEventListener('click', () => {
     document.body.classList.toggle('light-mode');
-    const btn = document.getElementById('theme-toggle');
-    btn.innerText = document.body.classList.contains('light-mode') ? "☀️ Light Mode" : "🌙 Dark Mode";
+    document.getElementById('theme-toggle').innerText = document.body.classList.contains('light-mode') ? "☀️ Light Mode" : "🌙 Dark Mode";
 });
