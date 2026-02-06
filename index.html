@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blitz Duel League 2026</title>
+    <title>Duel League 2026</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -11,7 +11,38 @@
 <body>
     
     <div class="top-bar">
-        <h1>🏆 Blitz Duel League 2026</h1>
+        <h1>🏆 Duel League 2026</h1>
+        
+        <div id="nextRoundTimer" class="timer-wrapper">
+            <div id="timerLabel" class="timer-title">Next round starts in:</div>
+            
+            <div id="countdown" class="countdown-container">
+                <div class="time-unit">
+                    <span id="t-days" class="time-num">00</span>
+                    <span class="time-lbl">DAYS</span>
+                </div>
+                <div class="time-sep">:</div>
+                <div class="time-unit">
+                    <span id="t-hours" class="time-num">00</span>
+                    <span class="time-lbl">HRS</span>
+                </div>
+                <div class="time-sep">:</div>
+                <div class="time-unit">
+                    <span id="t-minutes" class="time-num">00</span>
+                    <span class="time-lbl">MIN</span>
+                </div>
+                <div class="time-sep">:</div>
+                <div class="time-unit">
+                    <span id="t-seconds" class="time-num">00</span>
+                    <span class="time-lbl">SEC</span>
+                </div>
+            </div>
+
+            <div id="liveStatus" class="live-badge" style="display: none;">
+                <span class="pulse-dot"></span> ROUND IS LIVE
+            </div>
+        </div>
+
         <button id="theme-toggle" class="theme-btn">🌙 Dark Mode</button>
     </div>
 
@@ -21,18 +52,14 @@
         
         <aside class="sidebar">
             <h2>⚔️ Duel History</h2>
-            <div id="duelsWrapper">
-                </div>
+            <div id="duelsWrapper"></div>
         </aside>
 
         <main class="leaderboard-area">
             <div class="table-wrapper">
                 <table id="leaderboard">
-                    <thead>
-                        <tr></tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        </tbody>
+                    <thead><tr></tr></thead>
+                    <tbody id="tableBody"></tbody>
                 </table>
             </div>
         </main>
@@ -55,6 +82,11 @@
             </div>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <p>All Copyright Reserved © 2026-2026</p>
+        <p id="serverTime">Server Time: Loading...</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
