@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blitz Duel League 2026</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     
@@ -13,12 +15,12 @@
         <button id="theme-toggle" class="theme-btn">🌙 Dark Mode</button>
     </div>
 
-    <div id="loading">Calculating Duels & Scores...</div>
+    <div id="loading">Loading Tournament Data...</div>
 
     <div class="layout-container" id="mainContent" style="display: none;">
         
         <aside class="sidebar">
-            <h2>⚔️ Duels History</h2>
+            <h2>⚔️ Duel History</h2>
             <div id="duelsWrapper">
                 </div>
         </aside>
@@ -26,8 +28,11 @@
         <main class="leaderboard-area">
             <div class="table-wrapper">
                 <table id="leaderboard">
-                    <thead><tr></tr></thead>
-                    <tbody id="tableBody"></tbody>
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
                 </table>
             </div>
         </main>
@@ -38,7 +43,7 @@
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <div id="modalBody">
-                <h2 id="modalUsername">Loading...</h2>
+                <h2 id="modalUsername">Participant</h2>
                 <div class="cf-stats">
                     <p><strong>Codeforces Handle:</strong> <a id="cfHandleLink" href="#" target="_blank">...</a></p>
                     <p><strong>Rank:</strong> <span id="cfRank">...</span></p>
@@ -46,7 +51,7 @@
                     <p><strong>Max Rating:</strong> <span id="cfMaxRating">...</span></p>
                     <p><strong>Total Solved:</strong> <span id="cfSolved">...</span></p>
                 </div>
-                <div id="modalLoader" class="loader">Fetching data...</div>
+                <div id="modalLoader" class="loader">Fetching Data...</div>
             </div>
         </div>
     </div>
