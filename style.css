@@ -1,25 +1,28 @@
+/* =========================================
+   1. VARIABLES & THEME SETUP
+   ========================================= */
 :root {
-    /* Color Definitions - Dark Mode (Default) */
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --text-main: #f8fafc;
-    --text-dim: #94a3b8;
-    --accent: #38bdf8;
-    --border: #334155;
+    /* --- Dark Mode (Default) --- */
+    --bg-color: #0f172a;       /* Arka plan: Çok koyu mavi */
+    --card-bg: #1e293b;        /* Kartlar: Koyu mavi-gri */
+    --text-main: #f8fafc;      /* Ana metin: Beyazımsı */
+    --text-dim: #94a3b8;       /* Silik metin: Gri */
+    --accent: #38bdf8;         /* Vurgu rengi: Gök mavisi */
+    --border: #334155;         /* Çizgiler */
     --hover-bg: rgba(56, 189, 248, 0.1);
     
-    /* Status Colors */
-    --winner: #4ade80; /* Green */
-    --loser: #f87171;  /* Red */
+    /* --- Status Colors --- */
+    --winner: #4ade80; /* Yeşil */
+    --loser: #f87171;  /* Kırmızı */
     
-    /* Medals */
+    /* --- Medals --- */
     --gold: #fbbf24;
     --silver: #cbd5e1;
     --bronze: #d97706;
 }
 
 .light-mode {
-    /* Light Mode Colors */
+    /* --- Light Mode Overrides --- */
     --bg-color: #f1f5f9;
     --card-bg: #ffffff;
     --text-main: #1e293b;
@@ -31,6 +34,13 @@
     --loser: #dc2626;
 }
 
+/* =========================================
+   2. GLOBAL STYLES
+   ========================================= */
+* {
+    box-sizing: border-box; /* Layout hesaplamalarını kolaylaştırır */
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
@@ -38,43 +48,181 @@ body {
     margin: 0;
     padding: 20px;
     transition: background-color 0.3s, color 0.3s;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Header */
+/* =========================================
+   3. HEADER AREA
+   ========================================= */
 .top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    max-width: 1250px; margin: 0 auto 30px auto; padding: 0 10px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    max-width: 1450px; /* Geniş ekranlar için arttırıldı */
+    margin: 0 auto 30px auto; 
+    padding: 0 10px;
+    width: 100%;
 }
 
-h1 { margin: 0; color: var(--accent); font-weight: 800; letter-spacing: -1px; }
+h1 { 
+    margin: 0; 
+    color: var(--accent); 
+    font-weight: 800; 
+    letter-spacing: -1px; 
+    font-size: 1.8rem;
+}
 
 .theme-btn {
-    background: var(--accent); color: white; border: none;
-    padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    background: var(--accent); 
+    color: white; 
+    border: none;
+    padding: 10px 18px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: 600;
+    transition: transform 0.1s;
+}
+.theme-btn:active { transform: scale(0.95); }
+
+/* Loading State */
+#loading {
+    text-align: center; font-size: 1.2rem; color: var(--accent);
+    margin-top: 50px; font-weight: bold;
 }
 
-/* Layout */
+/* =========================================
+   4. MAIN LAYOUT
+   ========================================= */
 .layout-container {
-    display: flex; gap: 24px; max-width: 1300px; margin: 0 auto; align-items: flex-start;
+    display: flex; 
+    gap: 24px; 
+    max-width: 1450px; /* Leaderboard'un genişlemesi için alan */
+    margin: 0 auto; 
+    align-items: flex-start;
+    flex: 1; 
+    width: 100%;
 }
 
-/* --- SIDEBAR (DUELS) - NEW UI --- */
+/* =========================================
+   5. SIDEBAR (CONTAINER)
+   ========================================= */
 .sidebar {
-    width: 350px; /* Biraz daha genişlettik ki isimler sığsın */
+    width: 360px; 
     flex-shrink: 0; 
-    background: var(--card-bg); padding: 24px; 
-    border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* İki kutu arasındaki boşluk */
 }
 
-.sidebar h2 {
+/* --- ORTAK KART STİLİ (Hem Timer Hem History İçin) --- */
+.sidebar-card {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+    border: 1px solid var(--border);
+}
+
+/* =========================================
+   6. TIMER SECTION (KUTU 1)
+   ========================================= */
+.timer-section {
+    border-top: 4px solid var(--accent); /* Üstte vurgu çizgisi */
+}
+
+.timer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0,0,0,0.2); /* Hafif koyu iç zemin */
+    padding: 15px;
+    border-radius: 14px;
+    width: 100%;
+}
+
+.timer-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.countdown-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 48px;
+}
+
+.time-num {
+    font-family: 'Inter', monospace;
+    font-weight: 800;
+    font-size: 1.7rem;
+    line-height: 1;
+    color: var(--text-main);
+    transition: color 1s ease; /* Kırmızıya dönme efekti için */
+}
+
+.time-lbl {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.time-sep {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--border);
+    margin-top: 2px;
+}
+
+/* Canlı Rozeti */
+.live-badge {
+    color: var(--winner);
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 5px 0;
+}
+.pulse-dot {
+    width: 8px; height: 8px;
+    background-color: var(--winner);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+/* =========================================
+   7. DUEL HISTORY SECTION (KUTU 2)
+   ========================================= */
+.history-section h2 {
     text-align: center; color: var(--text-dim); margin-top: 0;
     border-bottom: 2px solid var(--border); padding-bottom: 15px; 
     font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase;
 }
 
-/* Accordion Styling */
+/* Accordion */
 .accordion-item { 
-    margin-bottom: 12px; 
+    margin-bottom: 10px; 
     border: 1px solid var(--border); 
     border-radius: 12px; 
     overflow: hidden; 
@@ -82,87 +230,59 @@ h1 { margin: 0; color: var(--accent); font-weight: 800; letter-spacing: -1px; }
 }
 
 .accordion-header {
-    background: var(--bg-color); padding: 14px 18px; cursor: pointer;
+    background: var(--bg-color); padding: 12px 16px; cursor: pointer;
     font-weight: 700; display: flex; justify-content: space-between; align-items: center;
-    user-select: none; transition: all 0.2s; color: var(--accent); font-size: 0.95rem;
+    user-select: none; transition: all 0.2s; color: var(--accent); font-size: 0.9rem;
 }
-.accordion-header:hover { background: var(--hover-bg); padding-left: 22px; }
+.accordion-header:hover { background: var(--hover-bg); }
 
 .accordion-content { display: none; background: var(--card-bg); border-top: 1px solid var(--border); }
 .accordion-content.active { display: block; animation: slideDown 0.3s ease-out; }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- NEW MATCH CARD UI --- */
+/* Match Card */
 .match-card {
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
 }
 .match-card:last-child { border-bottom: none; }
 .match-card:hover { background: rgba(255,255,255,0.03); }
 
-/* Player Name Styles */
 .player-info {
-    flex: 1; 
-    font-size: 0.9rem; 
-    font-weight: 700; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis;
-    color: var(--text-dim);
-    transition: color 0.3s;
+    flex: 1; font-size: 0.85rem; font-weight: 700; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text-dim); transition: color 0.3s;
 }
+.player-info.left { text-align: left; padding-right: 5px; }
+.player-info.right { text-align: right; padding-left: 5px; }
+.player-info.winner { color: var(--winner); }
+.player-info.loser { color: var(--loser); opacity: 0.6; text-decoration: line-through; }
 
-.player-info.left { text-align: left; padding-right: 8px; }
-.player-info.right { text-align: right; padding-left: 8px; }
-
-/* Winner/Loser Colors */
-.player-info.winner { color: var(--winner);     }
-.player-info.loser { color: var(--loser); opacity: 0.7; text-decoration-color: rgba(248, 113, 113, 0.4); }
-
-/* Center Score Board */
 .score-board {
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 6px;
-    background: var(--bg-color);
-    padding: 4px 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    min-width: 80px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    background: var(--bg-color); padding: 4px 8px; border-radius: 6px;
+    border: 1px solid var(--border); min-width: 75px;
 }
-
-.score-num {
-    font-family: 'Inter', monospace;
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: var(--text-main);
-    min-width: 20px;
-    text-align: center;
-}
+.score-num { font-family: 'Inter', monospace; font-weight: 800; font-size: 1rem; color: var(--text-main); }
 .score-num.winner-score { color: var(--winner); }
-.score-num.loser-score { color: var(--loser); opacity: 0.8; font-size: 0.95rem; }
+.score-num.loser-score { color: var(--loser); opacity: 0.8; }
+.vs-badge { font-size: 0.6rem; font-weight: 900; font-style: italic; color: var(--accent); opacity: 0.6; }
 
-.vs-badge {
-    font-size: 0.65rem;
-    font-weight: 900;
-    font-style: italic;
-    color: var(--accent);
-    opacity: 0.6;
-}
-
-/* --- LEADERBOARD --- */
+/* =========================================
+   8. LEADERBOARD AREA
+   ========================================= */
 .leaderboard-area {
-    flex-grow: 1; background: var(--card-bg); padding: 24px;
-    border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    flex-grow: 1; 
+    background: var(--card-bg); 
+    padding: 24px;
+    border-radius: 20px; 
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+    border: 1px solid var(--border);
+    min-width: 0; /* İçerik taşmasını engeller */
 }
 
 .table-wrapper { overflow-x: auto; }
@@ -171,7 +291,7 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; }
 th {
     background: var(--border); color: var(--text-dim); padding: 14px;
     text-align: center; font-size: 0.8rem; text-transform: uppercase;
-    cursor: pointer; user-select: none;
+    cursor: pointer; user-select: none; white-space: nowrap;
 }
 th:first-child { border-top-left-radius: 8px; }
 th:last-child { border-top-right-radius: 8px; }
@@ -188,12 +308,14 @@ tbody tr:hover td { background-color: var(--hover-bg); }
 .solved-cell { font-family: monospace; color: var(--text-dim); font-weight: bold; }
 .total-cell { font-weight: 800; color: var(--accent); font-size: 1.1rem; }
 
-/* Podium Colors */
+/* Madalya Renkleri */
 tr:nth-child(1) .user-name-cell { color: var(--gold); }
 tr:nth-child(2) .user-name-cell { color: var(--silver); }
 tr:nth-child(3) .user-name-cell { color: var(--bronze); }
 
-/* --- MODAL --- */
+/* =========================================
+   9. MODAL (POPUP)
+   ========================================= */
 .modal {
     display: none; position: fixed; z-index: 1000; left: 0; top: 0;
     width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -202,6 +324,7 @@ tr:nth-child(3) .user-name-cell { color: var(--bronze); }
     background: var(--card-bg); margin: 10vh auto; padding: 30px;
     border-radius: 16px; width: 90%; max-width: 450px; position: relative;
     text-align: center; border: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 .close-btn { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-dim); }
 .close-btn:hover { color: var(--accent); }
@@ -210,95 +333,9 @@ tr:nth-child(3) .user-name-cell { color: var(--bronze); }
 .cf-stats a { color: var(--accent); text-decoration: none; font-weight: bold; }
 #modalLoader { display: none; margin-top: 10px; color: var(--text-dim); font-style: italic; }
 
-/* Mobile Responsive */
-@media (max-width: 900px) {
-    .layout-container { flex-direction: column; }
-    .sidebar { width: 100%; box-sizing: border-box; }
-    .leaderboard-area { width: 100%; box-sizing: border-box; }
-}
-
-/* --- TIMER & STATUS UI (Yeni Eklenenler) --- */
-.timer-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: var(--card-bg);
-    padding: 8px 20px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    min-width: 280px;
-}
-
-.timer-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.countdown-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.time-unit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.time-num {
-    font-family: 'Inter', monospace; /* Monospace sayıların titremesini önler */
-    font-weight: 800;
-    font-size: 1.5rem;
-    color: var(--accent);
-    line-height: 1;
-}
-
-.time-lbl {
-    font-size: 0.6rem;
-    color: var(--text-dim);
-    font-weight: 600;
-    margin-top: 2px;
-}
-
-.time-sep {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--border);
-    margin-top: 2px;
-}
-
-/* Round Devam Ediyor Efekti */
-.live-badge {
-    color: var(--winner);
-    font-weight: 800;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 0;
-}
-
-.pulse-dot {
-    width: 10px; height: 10px;
-    background-color: var(--winner);
-    border-radius: 50%;
-    box-shadow: 0 0 0 rgba(74, 222, 128, 0.4);
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-}
-
-/* --- FOOTER UI --- */
+/* =========================================
+   10. FOOTER
+   ========================================= */
 .site-footer {
     margin-top: 40px;
     padding-top: 20px;
@@ -307,20 +344,17 @@ tr:nth-child(3) .user-name-cell { color: var(--bronze); }
     color: var(--text-dim);
     font-size: 0.85rem;
     padding-bottom: 20px;
+    width: 100%;
 }
+.site-footer p { margin: 5px 0; }
+#serverTime { font-family: 'Inter', monospace; color: var(--accent); opacity: 0.8; }
 
-.site-footer p {
-    margin: 5px 0;
-}
-
-#serverTime {
-    font-family: 'Inter', monospace;
-    color: var(--accent);
-    opacity: 0.8;
-}
-
-/* Mobil Düzenleme */
+/* =========================================
+   11. RESPONSIVE (MOBİL)
+   ========================================= */
 @media (max-width: 900px) {
-    .top-bar { flex-direction: column; gap: 20px; }
-    .timer-wrapper { width: 100%; box-sizing: border-box; }
+    .layout-container { flex-direction: column; }
+    .sidebar { width: 100%; }
+    .leaderboard-area { width: 100%; overflow-x: auto; }
+    .top-bar { flex-direction: column; gap: 15px; text-align: center; }
 }
