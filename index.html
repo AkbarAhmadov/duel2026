@@ -11,38 +11,7 @@
 <body>
     
     <div class="top-bar">
-        <h1>🏆 Blitz Duel League 2026</h1>
-        
-        <div id="nextRoundTimer" class="timer-wrapper">
-            <div id="timerLabel" class="timer-title">Next round starts in:</div>
-            
-            <div id="countdown" class="countdown-container">
-                <div class="time-unit">
-                    <span id="t-days" class="time-num">00</span>
-                    <span class="time-lbl">DAYS</span>
-                </div>
-                <div class="time-sep">:</div>
-                <div class="time-unit">
-                    <span id="t-hours" class="time-num">00</span>
-                    <span class="time-lbl">HRS</span>
-                </div>
-                <div class="time-sep">:</div>
-                <div class="time-unit">
-                    <span id="t-minutes" class="time-num">00</span>
-                    <span class="time-lbl">MIN</span>
-                </div>
-                <div class="time-sep">:</div>
-                <div class="time-unit">
-                    <span id="t-seconds" class="time-num">00</span>
-                    <span class="time-lbl">SEC</span>
-                </div>
-            </div>
-
-            <div id="liveStatus" class="live-badge" style="display: none;">
-                <span class="pulse-dot"></span> ROUND IS LIVE
-            </div>
-        </div>
-
+        <h1>🏆 Duel League 2026</h1>
         <button id="theme-toggle" class="theme-btn">🌙 Dark Mode</button>
     </div>
 
@@ -51,8 +20,42 @@
     <div class="layout-container" id="mainContent" style="display: none;">
         
         <aside class="sidebar">
-            <h2>⚔️ Duel History</h2>
-            <div id="duelsWrapper"></div>
+            
+            <div id="nextRoundTimer" class="timer-wrapper">
+                <div id="timerLabel" class="timer-title">Next round starts in:</div>
+                
+                <div id="countdown" class="countdown-container">
+                    <div class="time-unit">
+                        <span id="t-days" class="time-num">00</span>
+                        <span class="time-lbl">DAYS</span>
+                    </div>
+                    <div class="time-sep">:</div>
+                    <div class="time-unit">
+                        <span id="t-hours" class="time-num">00</span>
+                        <span class="time-lbl">HRS</span>
+                    </div>
+                    <div class="time-sep">:</div>
+                    <div class="time-unit">
+                        <span id="t-minutes" class="time-num">00</span>
+                        <span class="time-lbl">MIN</span>
+                    </div>
+                    <div class="time-sep">:</div>
+                    <div class="time-unit">
+                        <span id="t-seconds" class="time-num">00</span>
+                        <span class="time-lbl">SEC</span>
+                    </div>
+                </div>
+
+                <div id="liveStatus" class="live-badge" style="display: none;">
+                    <span class="pulse-dot"></span> ROUND IS LIVE
+                </div>
+            </div>
+
+            <div class="history-wrapper">
+                <h2>⚔️ Duel History</h2>
+                <div id="duelsWrapper"></div>
+            </div>
+
         </aside>
 
         <main class="leaderboard-area">
